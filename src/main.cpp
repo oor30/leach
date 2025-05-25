@@ -5,9 +5,11 @@
 
 #include "../include/functions.hpp"
 #include "../include/types.hpp"
+#include <algorithm>
 #include <iostream>
 #include <random>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -125,6 +127,8 @@ int main() {
   cout << "シミュレーションを開始します" << endl;
 
   // S個サンプル
+  int FDNs[S];
+  int LDNs[S];
   for (int s = 0; s < S; s++) {
     SetInits(); // サンプル毎の初期化
 
@@ -165,7 +169,9 @@ int main() {
     sumUsedEn += En_FDN(); // FDNまでのラウンド平均消費エネルギー
 
     sFDN += FDN; // 加算
-    sLDN += LDN; // 加算
+    FDNs[s] = FDN; // FDNの保存
+    sLDN += LDN;   // 加算
+    LDNs[s] = LDN; // LDNの保存
   }
 
   cout << "----- 結果 -----" << endl;
@@ -176,6 +182,12 @@ int main() {
   cout << "Average:" << endl;
   cout << " FDN = " << sFDN / S << endl; // FDN画面出力
   cout << " LDN = " << sLDN / S << endl; // LDN画面出力
+
+  cout << "Min Max:" << endl;
+  cout << " FDN = " << *min_element(begin(FDNs), end(FDNs)) << ", "
+       << *max_element(begin(FDNs), end(FDNs)) << endl; // FDNの最小・最大
+  cout << " LDN = " << *min_element(begin(LDNs), end(LDNs)) << ", "
+       << *max_element(begin(LDNs), end(LDNs)) << endl; // LDNの最小・最大
 
   return 0;
 }

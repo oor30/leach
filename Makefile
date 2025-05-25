@@ -10,7 +10,7 @@ LIBRARIES = -lgurobi_c++ -lgurobi120
 CXXFLAGS = -std=c++14 -Wall -Wextra -I$(INCLUDE) -DSAMPLES_PATH=\"$(SAMPLES_PATH)\"
 LDFLAGS = -L$(LIBRARY_DIR) $(LIBRARIES)
 
-SRCS = src/main.cpp
+SRCS = src/main.cpp src/fileio.cpp src/energy.cpp src/routing.cpp src/globals.cpp
 OBJS = $(SRCS:src/%.cpp=obj/%.o)
 TARGET = out/main
 

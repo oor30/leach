@@ -6,6 +6,7 @@
 #include "../include/functions.hpp"
 #include "../include/types.hpp"
 #include <algorithm>
+#include <gurobi_c++.h> // Gurobi C++ API
 #include <iostream>
 #include <random>
 #include <string>
@@ -158,6 +159,8 @@ int main() {
         continue;
       }
 
+      if (Round == M) solve();
+
       Rnd_CHs(); // 乱数によるCH選択
       SetNh();   // Next hop設定
 
@@ -190,4 +193,60 @@ int main() {
        << *max_element(begin(LDNs), end(LDNs)) << endl; // LDNの最小・最大
 
   return 0;
+}
+
+void solve() {
+  // ここに問題を解くためのコードを追加できます。
+  // 例えば、特定のアルゴリズムを実行したり、データを処理したりすることができます。
+  // 現在は空の関数として定義されています。
+  // この関数は、メイン関数から呼び出されることを想定しています。
+  // 制約式： XR*Eij <= ej
+  // XRは R ラウンドで収集した全域木を用いる回数であり,整数変数である.
+  // M は全域木を収集するラウンド数
+  // Eijはラウンド i において j 番の SＮが消費したエネルギー
+  // ejはＭラウンド終了時点での j 番の SＮの残余エネルギーを示す.
+  try {
+    cout << "solve関数が呼び出されました。" << endl;
+    double ej[N];                            // 各SNの残存エネルギー
+    for (int i = 0; i < N; ++i) {
+      ej[i] = SN[i].En;
+    }
+    std::vector<std::vector<double>> Eij = En_R; // ラウンド毎の消費エネルギー
+
+    GRBEnv env = GRBEnv();          // Gurobi環境の初期化
+    GRBModel model = GRBModel(env); // モデルの作成
+    model.set(GRB_StringAttr_ModelName, "EnergyOptimization"); // モデル名の設定
+    GRBVar XR[N];                                              // 各SNの選択変数
+    for (int i = 1; i <= N; ++i) {
+      XR[i - 1] = model.addVar(0.0, M, 0.0, GRB_INTEGER,
+                              "Xn_" + to_string(i)); // バイナリ変数
+    }
+    model.update(); // モデルの更新
+    // 制約式の追加
+    for (int j = 0; j < N; ++j) {
+      GRBLinExpr expr = 0.0; // 線形式の初期化
+      for (int i = 0; i < M; ++i) {
+        expr += Eij[i][j] * XR[i]; // 各SNの消費エネルギーを加算
+      }
+      model.addConstr(expr <= ej[j], "EnergyConstraint_" + to_string(j + 1)); // 制約の追加
+    }
+    model.set(GRB_IntAttr_ModelSense, GRB_MAXIMIZE); // 最大化問題として設定
+    model.optimize(); // 問題の最適化
+    if (model.get(GRB_IntAttr_Status) == GRB_OPTIMAL) {
+      cout << "最適解が見つかりました。" << endl;
+      for (int i = 0; i < N; ++i) {
+        cout << "SN " << i + 1 << ": " << XR[i].get(GRB_DoubleAttr_X) << endl; // 各SNの選択変数の値を出力
+      }
+    } else {
+      cout << "最適解は見つかりませんでした。" << endl;
+    }
+    model.write("model.lp"); // モデルの内容をファイルに書き出し
+    cout << "モデルの内容を model.lp に書き出しました。" << endl;
+  } catch (GRBException& e) {
+    cout << "Gurobiエラー: " << e.getMessage() << endl; // エラーメッセージの出力
+  } catch (std::exception& e) {
+    cout << "例外: " << e.what() << endl; // その他の例外の出力
+  } catch (...) {
+    cout << "不明なエラーが発生しました。" << endl; // 不明なエラーの出力
+  }
 }

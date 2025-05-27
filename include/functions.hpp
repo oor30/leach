@@ -30,3 +30,4 @@ int ShortestPathRelay(int i);
 // その他
 void ViewInits();
 void SetInits();
+void solve();

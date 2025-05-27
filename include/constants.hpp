@@ -23,3 +23,5 @@ const double dc = pow(Efs / Emp, 0.5); // 送信エネルギーの境界距離[m
 
 const int Rmax = 3000; // magic number
 const int S = 1;       // S個のサンプル，S=1デバック用
+
+const int M = 1000; // 全域木の収集ラウンド数

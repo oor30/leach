@@ -41,8 +41,8 @@ void CalcEn() {
       SN[i].msg = 0; // 枯渇
   }
 
-  Loopi1N // CM → CH
-  {
+  // CM → CH
+  Loopi1N {
     if (SN[i].CH)
       continue; // 非CHのみ
     if (SN[i].En <= 0)
@@ -51,26 +51,30 @@ void CalcEn() {
     int CH = SN[i].nh; // iのCH
 
     SN[i].En -= K * (Eelec + Esnd[i][CH]); // CHへの送信コスト
+    En_R[Round][i] += K * (Eelec + Esnd[i][CH]); // ラウンド毎の消費エネルギー
 
     if (SN[i].En < 0)
       continue; // 枯渇送信取消
 
     SN[CH].En -= (Eelec * K); // CHの受信コスト
+    En_R[Round][CH] += (Eelec * K); // ラウンド毎の消費エネルギー
     if (SN[CH].En < 0)
       continue; // 枯渇受信取消
 
     SN[CH].msg += SN[i].msg; // 上乗せ
   }
 
-  Loopi1N // CH → BS
-  {
-    if (SN[i].CH) // CHのみ
-    {
+  // CH → BS
+  Loopi1N {
+    // CHのみ
+    if (SN[i].CH) {
       SN[i].En -= Eda * SN[i].msg * K; // iの融合コスト
+      En_R[Round][i] += Eda * SN[i].msg * K; // ラウンド毎の消費エネルギー
       if (SN[i].En < 0)
         continue; // 枯渇skip
 
       SN[i].En -= K * (Eelec + Esnd[i][0]); // BSへの送信コスト
+      En_R[Round][i] += K * (Eelec + Esnd[i][0]); // ラウンド毎の消費エネルギー
       if (SN[i].En < 0)
         continue; // 枯渇skip
 

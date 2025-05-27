@@ -168,7 +168,7 @@ int main() {
 
     sumUsedEn += En_FDN(); // FDNまでのラウンド平均消費エネルギー
 
-    sFDN += FDN; // 加算
+    sFDN += FDN;   // 加算
     FDNs[s] = FDN; // FDNの保存
     sLDN += LDN;   // 加算
     LDNs[s] = LDN; // LDNの保存

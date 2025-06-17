@@ -1,3 +1,4 @@
+#include "../include/functions.hpp"
 #include "../include/types.hpp"
 #include <fstream>
 #include <iostream>

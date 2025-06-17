@@ -1,3 +1,4 @@
+#include "../include/functions.hpp"
 #include "../include/types.hpp"
 #include <iostream>
 
@@ -51,13 +52,13 @@ void CalcEn() {
     int CH = SN[i].nh; // iのCH
 
     SN[i].En -= K * (Eelec + Esnd[i][CH]); // CHへの送信コスト
-    En_R[Round][i] += K * (Eelec + Esnd[i][CH]); // ラウンド毎の消費エネルギー
+    En_R[Round-1][i] += K * (Eelec + Esnd[i][CH]); // ラウンド毎の消費エネルギー
 
     if (SN[i].En < 0)
       continue; // 枯渇送信取消
 
     SN[CH].En -= (Eelec * K); // CHの受信コスト
-    En_R[Round][CH] += (Eelec * K); // ラウンド毎の消費エネルギー
+    En_R[Round-1][CH] += (Eelec * K); // ラウンド毎の消費エネルギー
     if (SN[CH].En < 0)
       continue; // 枯渇受信取消
 

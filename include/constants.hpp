@@ -21,7 +21,7 @@ const double Efs = 100 * (1e-12);      // 送信エネルギー（自由空間�
 const double Emp = 0.0013 * (1e-12);   // 送信エネルギー（多重経路）[J/m^4]
 const double dc = pow(Efs / Emp, 0.5); // 送信エネルギーの境界距離[m]
 
-const int Rmax = 3000; // magic number
+const int Rmax = 100; // magic number
 const int S = 1;       // S個のサンプル，S=1デバック用
 
-const int M = 1000; // 全域木の収集ラウンド数
+const int M = 100; // 全域木の収集ラウンド数

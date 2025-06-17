@@ -18,4 +18,4 @@ double UsedEn[Rmax]; // ラウンド毎の消費エネルギー
 double sumUsedEn;    // 消費エネルギーの総和
 
 std::vector<std::vector<double>>
-    En_R(M, std::vector<double>(N)); // ラウンド毎の消費エネルギー
+    En_R(Rmax, std::vector<double>(N)); // ラウンド毎の消費エネルギー

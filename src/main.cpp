@@ -159,11 +159,11 @@ int main() {
         continue;
       }
 
+      // ソルバーを呼び出す
       if (Round == M) solve();
 
       Rnd_CHs(); // 乱数によるCH選択
       SetNh();   // Next hop設定
-
       CalcEn();  // 消費エネルギー算出
       SetAnum(); // 活ノード数算出
       SaveNh();  // Next hopの座標を保存
@@ -215,13 +215,15 @@ void solve() {
 
     GRBEnv env = GRBEnv();          // Gurobi環境の初期化
     GRBModel model = GRBModel(env); // モデルの作成
+    model.set(GRB_DoubleParam_TimeLimit, 60.0); // タイムリミットの設定
+    model.set(GRB_DoubleParam_MIPGap, 0.005); // MIPギャップの設定
     model.set(GRB_StringAttr_ModelName, "EnergyOptimization"); // モデル名の設定
-    GRBVar XR[N];                                              // 各SNの選択変数
-    for (int i = 1; i <= N; ++i) {
-      XR[i - 1] = model.addVar(0.0, M, 0.0, GRB_INTEGER,
-                              "Xn_" + to_string(i)); // バイナリ変数
+
+    GRBVar XR[M];                                              // 各SNの選択変数
+    for (int i = 1; i <= M; ++i) {
+      XR[i - 1] = model.addVar(0.0, GRB_MAXINT, 0.0, GRB_INTEGER,
+                               "Xn_" + to_string(i)); // 整数変数
     }
-    model.update(); // モデルの更新
     // 制約式の追加
     for (int j = 0; j < N; ++j) {
       GRBLinExpr expr = 0.0; // 線形式の初期化
@@ -230,18 +232,26 @@ void solve() {
       }
       model.addConstr(expr <= ej[j], "EnergyConstraint_" + to_string(j + 1)); // 制約の追加
     }
-    model.set(GRB_IntAttr_ModelSense, GRB_MAXIMIZE); // 最大化問題として設定
+    // 目的関数の設定
+    GRBLinExpr objective = 0.0; // 目的関数の初期化
+    for (int i = 0; i < M; ++i) {
+      objective += XR[i]; // 各SNの選択変数を加算
+    }
+    model.setObjective(objective, GRB_MAXIMIZE); // 目的関数の設定
     model.optimize(); // 問題の最適化
     if (model.get(GRB_IntAttr_Status) == GRB_OPTIMAL) {
       cout << "最適解が見つかりました。" << endl;
-      for (int i = 0; i < N; ++i) {
-        cout << "SN " << i + 1 << ": " << XR[i].get(GRB_DoubleAttr_X) << endl; // 各SNの選択変数の値を出力
+      for (int i = 0; i < M; ++i) {
+        cout << XR[i].get(GRB_StringAttr_VarName) << ": "
+             << XR[i].get(GRB_DoubleAttr_X) << endl; // 各SNの選択変数の値を出力
       }
+      cout << "最適値: " << model.get(GRB_DoubleAttr_ObjVal) << endl; // 最適値の出力
     } else {
       cout << "最適解は見つかりませんでした。" << endl;
     }
     model.write("model.lp"); // モデルの内容をファイルに書き出し
     cout << "モデルの内容を model.lp に書き出しました。" << endl;
+    
   } catch (GRBException& e) {
     cout << "Gurobiエラー: " << e.getMessage() << endl; // エラーメッセージの出力
   } catch (std::exception& e) {
